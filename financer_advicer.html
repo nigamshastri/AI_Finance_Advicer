@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Finance Advisor</title>
     <style>
+        /* Base styles from original */
         * {
             margin: 0;
             padding: 0;
@@ -16,6 +17,9 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
+            display: flex; /* Changed to flex for centering login */
+            justify-content: center;
+            align-items: center;
         }
 
         .container {
@@ -25,6 +29,7 @@
             border-radius: 20px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             overflow: hidden;
+            width: 100%; /* Ensure it takes full width in flex context */
         }
 
         .header {
@@ -260,20 +265,155 @@
             background: linear-gradient(90deg, #28a745, #20c997);
             transition: width 0.5s ease;
         }
+
+        /* --- New Styles for Login/Register Pages --- */
+        .auth-wrapper {
+            /* This will be the only thing visible initially when not logged in */
+            display: none; /* Controlled by JS, will be 'flex' */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* Match body background */
+            justify-content: center;
+            align-items: center;
+            z-index: 1001; /* Ensure it's on top */
+            padding: 20px;
+        }
+
+        .auth-card {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 450px;
+            width: 100%;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .auth-card h2 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+        }
+
+        .auth-card .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .auth-card input[type="text"],
+        .auth-card input[type="password"] {
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            width: 100%;
+            font-size: 16px;
+        }
+
+        .auth-card .btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            margin-top: 10px;
+        }
+
+        .message-area {
+            min-height: 20px; /* Give it some space even when empty */
+            margin-top: 15px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .error-message {
+            color: #dc3545; /* Red for errors */
+        }
+        .success-message {
+            color: #28a745; /* Green for success */
+        }
+        .info-message {
+            color: #007bff; /* Blue for info/loading */
+        }
+
+
+        .auth-card .switch-text {
+            margin-top: 20px;
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+
+        .auth-card .switch-text a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .auth-card .switch-text a:hover {
+            text-decoration: underline;
+        }
+
+        /* Adjust body height for main content when login is hidden */
+        body.app-active {
+            min-height: 100vh;
+            display: block; /* Allow container to take normal flow */
+        }
     </style>
 </head>
 <body>
-    <div class="container">
+    <!-- Authentication Wrapper (Login/Register Forms) -->
+    <div id="authWrapper" class="auth-wrapper">
+        <!-- Login Card -->
+        <div id="loginCard" class="auth-card">
+            <h2>Welcome Back!</h2>
+            <div class="form-group">
+                <label for="loginUsername">Username</label>
+                <input type="text" id="loginUsername" placeholder="Enter your username">
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">Password</label>
+                <input type="password" id="loginPassword" placeholder="Enter your password">
+            </div>
+            <button class="btn" id="loginButton">Login</button>
+            <p id="loginMessage" class="message-area"></p>
+            <p class="switch-text">Don't have an account? <a id="showRegister">Sign Up</a></p>
+        </div>
+
+        <!-- Register Card (Initially hidden) -->
+        <div id="registerCard" class="auth-card" style="display: none;">
+            <h2>Create Your Account</h2>
+            <div class="form-group">
+                <label for="registerUsername">Username</label>
+                <input type="text" id="registerUsername" placeholder="Choose a username">
+            </div>
+            <div class="form-group">
+                <label for="registerPassword">Password</label>
+                <input type="password" id="registerPassword" placeholder="Create a password">
+            </div>
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password</label>
+                <input type="password" id="confirmPassword" placeholder="Confirm your password">
+            </div>
+            <button class="btn" id="registerButton">Register</button>
+            <p id="registerMessage" class="message-area"></p>
+            <p class="switch-text">Already have an account? <a id="showLogin">Login</a></p>
+        </div>
+    </div>
+
+    <!-- Main Application Content (initially hidden) -->
+    <div class="container" id="mainAppContent" style="display: none;">
         <div class="header">
             <h1>🤖 AI Finance Advisor</h1>
             <p>Your Personal Financial Intelligence Assistant</p>
         </div>
 
         <div class="nav-tabs">
-            <button class="nav-tab active" onclick="showTab('budget')">Budget Planner</button>
-            <button class="nav-tab" onclick="showTab('investment')">Investment Calculator</button>
-            <button class="nav-tab" onclick="showTab('loan')">Loan Calculator</button>
-            <button class="nav-tab" onclick="showTab('advisor')">AI Advisor Chat</button>
+            <button class="nav-tab active" onclick="showTab('budget', this)">Budget Planner</button>
+            <button class="nav-tab" onclick="showTab('investment', this)">Investment Calculator</button>
+            <button class="nav-tab" onclick="showTab('loan', this)">Loan Calculator</button>
+            <button class="nav-tab" onclick="showTab('advisor', this)">AI Advisor Chat</button>
         </div>
 
         <div class="content">
@@ -403,11 +543,232 @@
                     </div>
                 </div>
             </div>
+            <button class="btn" id="logoutButton" style="margin-top: 20px; background: linear-gradient(135deg, #dc3545 0%, #b22222 100%);">Logout</button>
         </div>
     </div>
 
     <script>
-        function showTab(tabName) {
+        // --- Login/Logout Functionality ---
+        const authWrapper = document.getElementById('authWrapper');
+        const loginCard = document.getElementById('loginCard');
+        const registerCard = document.getElementById('registerCard');
+        const mainAppContent = document.getElementById('mainAppContent');
+
+        const loginButton = document.getElementById('loginButton');
+        const logoutButton = document.getElementById('logoutButton');
+        const registerButton = document.getElementById('registerButton');
+        const showRegisterLink = document.getElementById('showRegister');
+        const showLoginLink = document.getElementById('showLogin');
+
+        const loginUsernameInput = document.getElementById('loginUsername');
+        const loginPasswordInput = document.getElementById('loginPassword');
+        const loginMessage = document.getElementById('loginMessage');
+
+        const registerUsernameInput = document.getElementById('registerUsername');
+        const registerPasswordInput = document.getElementById('registerPassword');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const registerMessage = document.getElementById('registerMessage');
+
+        // Retrieve or initialize registered users from localStorage
+        // For demonstration, username 'user' and password 'password' will be the default.
+        // In a real app, this would be a backend database.
+        let registeredUsers = JSON.parse(localStorage.getItem('registeredUsers')) || [
+            { username: 'user', password: 'password' }
+        ];
+
+        // Function to save the current state of registeredUsers to localStorage
+        function saveUsers() {
+            try {
+                localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+            } catch (e) {
+                console.error("Error saving to localStorage:", e);
+                alert("Could not save user data. Local storage might be full or disabled.");
+            }
+        }
+
+        // --- UI Display Functions ---
+        function showLoginPage() {
+            authWrapper.style.display = 'flex';
+            loginCard.style.display = 'block';
+            registerCard.style.display = 'none';
+            mainAppContent.style.display = 'none';
+            document.body.classList.remove('app-active');
+            clearAuthMessages();
+            clearAuthInputs();
+        }
+
+        function showRegisterPage() {
+            authWrapper.style.display = 'flex';
+            loginCard.style.display = 'none';
+            registerCard.style.display = 'block';
+            mainAppContent.style.display = 'none';
+            document.body.classList.remove('app-active');
+            clearAuthMessages();
+            clearAuthInputs();
+        }
+
+        function showAppContent() {
+            authWrapper.style.display = 'none';
+            mainAppContent.style.display = 'block';
+            document.body.classList.add('app-active');
+            // Re-initialize the active tab to ensure correct display after login
+            const firstNavTab = document.querySelector('.nav-tab');
+            if (firstNavTab) {
+                showTab('budget', firstNavTab); // Default to budget tab
+            }
+        }
+
+        // Helper to clear messages and their styles
+        function clearAuthMessages() {
+            loginMessage.textContent = '';
+            loginMessage.className = 'message-area';
+            registerMessage.textContent = '';
+            registerMessage.className = 'message-area';
+        }
+
+        // Helper to clear input fields
+        function clearAuthInputs() {
+            loginUsernameInput.value = '';
+            loginPasswordInput.value = '';
+            registerUsernameInput.value = '';
+            registerPasswordInput.value = '';
+            confirmPasswordInput.value = '';
+        }
+
+        // --- Authentication & Registration Logic ---
+
+        // Simulated backend authentication check
+        function authenticateUser(username, password) {
+            return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    const user = registeredUsers.find(u => u.username === username && u.password === password);
+                    if (user) {
+                        resolve({ success: true, message: 'Login successful!' });
+                    } else {
+                        reject({ success: false, message: 'Invalid username or password.' });
+                    }
+                }, 1000); // Simulate network delay
+            });
+        }
+
+        // Simulated backend registration
+        function registerNewUser(username, password) {
+            return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    if (username.length < 3) {
+                        return reject({ success: false, message: 'Username must be at least 3 characters long.' });
+                    }
+                    if (password.length < 6) {
+                        return reject({ success: false, message: 'Password must be at least 6 characters long.' });
+                    }
+                    if (registeredUsers.some(u => u.username === username)) {
+                        return reject({ success: false, message: 'Username already exists. Please choose another.' });
+                    }
+                    
+                    registeredUsers.push({ username: username, password: password });
+                    saveUsers(); // Persist to localStorage
+                    resolve({ success: true, message: 'Registration successful! You can now log in.' });
+                }, 1500); // Simulate network delay
+            });
+        }
+
+        // --- Event Listeners ---
+
+        // Login Button Click
+        loginButton.addEventListener('click', async () => {
+            const username = loginUsernameInput.value.trim();
+            const password = loginPasswordInput.value.trim();
+
+            if (!username || !password) {
+                loginMessage.textContent = 'Please enter both username and password.';
+                loginMessage.className = 'message-area error-message';
+                return;
+            }
+
+            loginMessage.textContent = 'Logging in...';
+            loginMessage.className = 'message-area info-message';
+
+            try {
+                const result = await authenticateUser(username, password);
+                if (result.success) {
+                    loginMessage.textContent = result.message;
+                    loginMessage.className = 'message-area success-message';
+                    localStorage.setItem('isLoggedIn', 'true');
+                    setTimeout(() => {
+                        showAppContent();
+                    }, 500); // Short delay before redirecting to app
+                } else {
+                    loginMessage.textContent = result.message;
+                    loginMessage.className = 'message-area error-message';
+                }
+            } catch (error) {
+                loginMessage.textContent = error.message || 'An unexpected error occurred during login.';
+                loginMessage.className = 'message-area error-message';
+            }
+        });
+
+        // Register Button Click
+        registerButton.addEventListener('click', async () => {
+            const username = registerUsernameInput.value.trim();
+            const password = registerPasswordInput.value.trim();
+            const confirmPassword = confirmPasswordInput.value.trim();
+
+            if (!username || !password || !confirmPassword) {
+                registerMessage.textContent = 'Please fill in all fields.';
+                registerMessage.className = 'message-area error-message';
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                registerMessage.textContent = 'Passwords do not match.';
+                registerMessage.className = 'message-area error-message';
+                return;
+            }
+
+            registerMessage.textContent = 'Registering...';
+            registerMessage.className = 'message-area info-message';
+
+            try {
+                const result = await registerNewUser(username, password);
+                if (result.success) {
+                    registerMessage.textContent = result.message;
+                    registerMessage.className = 'message-area success-message';
+                    setTimeout(() => {
+                        showLoginPage(); // Redirect to login page after successful registration
+                        loginUsernameInput.value = username; // Pre-fill login username
+                        loginMessage.textContent = 'Registration successful! Please log in with your new account.';
+                        loginMessage.className = 'message-area info-message'; // Info message on login page
+                    }, 1000); // Give time for success message to be read
+                } else {
+                    registerMessage.textContent = result.message;
+                    registerMessage.className = 'message-area error-message';
+                }
+            } catch (error) {
+                registerMessage.textContent = error.message || 'An unexpected error occurred during registration.';
+                registerMessage.className = 'message-area error-message';
+            }
+        });
+
+        // Logout Button Click
+        logoutButton.addEventListener('click', () => {
+            localStorage.removeItem('isLoggedIn');
+            showLoginPage();
+        });
+
+        // Switch to Register Form
+        showRegisterLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showRegisterPage();
+        });
+
+        // Switch to Login Form
+        showLoginLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showLoginPage();
+        });
+
+        // --- Existing App Functionality (modified showTab) ---
+        function showTab(tabName, clickedElement) {
             // Hide all tab contents
             const tabs = document.querySelectorAll('.tab-content');
             tabs.forEach(tab => tab.classList.remove('active'));
@@ -418,7 +779,9 @@
             
             // Show selected tab and activate nav
             document.getElementById(tabName).classList.add('active');
-            event.target.classList.add('active');
+            if (clickedElement) {
+                clickedElement.classList.add('active');
+            }
         }
 
         function calculateBudget() {
@@ -532,13 +895,18 @@
             const amount = parseFloat(document.getElementById('loanAmount').value) || 0;
             const rate = parseFloat(document.getElementById('loanRate').value) / 100 / 12 || 0;
             const term = parseFloat(document.getElementById('loanTerm').value) * 12 || 0;
-            const type = document.getElementById('loanType').value;
+            const type = document.getElementById('loanType').value; // Loan type is not used in calculation but can be for specific advice
 
             if (amount <= 0 || rate <= 0 || term <= 0) {
                 alert('Please enter valid loan details');
                 return;
             }
 
+            // Loan payment formula: M = P [ i(1 + i)^n ] / [ (1 + i)^n – 1]
+            // M = monthly payment
+            // P = principal loan amount
+            // i = monthly interest rate (annual rate / 12)
+            // n = total number of payments (loan term in years * 12)
             const monthlyPayment = (amount * rate * Math.pow(1 + rate, term)) / (Math.pow(1 + rate, term) - 1);
             const totalPayment = monthlyPayment * term;
             const totalInterest = totalPayment - amount;
@@ -615,27 +983,27 @@
             const message = userMessage.toLowerCase();
             
             // Budget-related responses
-            if (message.includes('budget') || message.includes('expense')) {
+            if (message.includes('budget') || message.includes('expense') || message.includes('spend')) {
                 return "For effective budgeting, try the 50/30/20 rule: 50% for needs, 30% for wants, and 20% for savings. Track your expenses for a month to see where your money goes. Use the Budget Planner tab to analyze your current spending!";
             }
             
             // Investment responses
-            if (message.includes('invest') || message.includes('stock') || message.includes('portfolio')) {
+            if (message.includes('invest') || message.includes('stock') || message.includes('portfolio') || message.includes('mutual fund')) {
                 return "Start with low-cost index funds for diversification. Dollar-cost averaging helps reduce risk. Consider your age: subtract your age from 100 to determine stock allocation percentage. Always invest for the long term and never invest money you'll need within 5 years.";
             }
             
             // Debt responses
-            if (message.includes('debt') || message.includes('loan') || message.includes('credit card')) {
+            if (message.includes('debt') || message.includes('loan') || message.includes('credit card') || message.includes('mortgage')) {
                 return "Focus on high-interest debt first (avalanche method) or smallest balances (snowball method). Pay more than minimums when possible. Consider debt consolidation if it lowers your overall interest rate. Avoid taking on new debt while paying off existing debt.";
             }
             
             // Savings responses
-            if (message.includes('save') || message.includes('emergency fund')) {
+            if (message.includes('save') || message.includes('emergency fund') || message.includes('savings account')) {
                 return "Build an emergency fund of 3-6 months of expenses first. Automate your savings - pay yourself first! Use high-yield savings accounts for emergency funds. For goals beyond 1 year, consider investing instead of just saving.";
             }
             
             // Retirement responses
-            if (message.includes('retirement') || message.includes('401k') || message.includes('ira')) {
+            if (message.includes('retirement') || message.includes('401k') || message.includes('ira') || message.includes('pension')) {
                 return "Start early! Contribute enough to get full employer 401(k) match - it's free money. Consider Roth IRA for tax-free withdrawals in retirement. Aim to save 10-15% of income for retirement. Take advantage of catch-up contributions if you're over 50.";
             }
             
@@ -643,13 +1011,22 @@
             if (message.includes('credit score') || message.includes('credit report')) {
                 return "Pay bills on time (35% of score), keep credit utilization below 30% (30% of score), maintain old accounts for credit history length (15%), limit new credit inquiries (10%), and have a mix of credit types (10%). Check your credit report annually for free.";
             }
+
+            // Greetings / General help
+            if (message.includes('hello') || message.includes('hi') || message.includes('hey')) {
+                return "Hello! How can I assist you with your financial journey today?";
+            }
+            if (message.includes('how are you')) {
+                return "As an AI, I don't have feelings, but I'm ready to help you with your finances!";
+            }
             
             // Default response
             const responses = [
                 "That's a great financial question! Here are some key principles: spend less than you earn, invest early and consistently, build an emergency fund, and educate yourself about personal finance. What specific area would you like to focus on?",
                 "Financial success comes from good habits: budgeting, saving automatically, investing for the long term, and avoiding high-interest debt. Which of these areas would you like to improve first?",
                 "Smart financial planning involves setting clear goals, creating a budget, building emergency savings, and investing wisely. What's your biggest financial challenge right now?",
-                "Remember the basics: emergency fund first, then pay off high-interest debt, contribute to retirement accounts, and invest in diversified portfolios. What aspect of your finances needs the most attention?"
+                "Remember the basics: emergency fund first, then pay off high-interest debt, contribute to retirement accounts, and invest in diversified portfolios. What aspect of your finances needs the most attention?",
+                "I'm here to help with your financial questions. Could you please elaborate or ask a specific question about budgeting, investing, saving, or debt?"
             ];
             
             return responses[Math.floor(Math.random() * responses.length)];
@@ -661,10 +1038,13 @@
             }
         }
 
-        // Initialize with a welcome message
+        // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
-            // Focus on income input when budget tab is active
-            document.getElementById('income').focus();
+            if (localStorage.getItem('isLoggedIn') === 'true') {
+                showAppContent();
+            } else {
+                showLoginPage();
+            }
         });
     </script>
 </body>
